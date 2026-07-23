@@ -1,13 +1,5 @@
-"""
-ExamGPT - Frontend
-A RAG-based exam preparation assistant.
-Backend (ingestion.py, retrieval.py) is untouched — this file only
-handles presentation, layout, and session state.
-"""
-
 import os
 import tempfile
-
 import streamlit as st
 
 os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
@@ -15,13 +7,8 @@ os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
 from ingestion import ingest_pdf, clear_vectorstore
 from retrieval import ask_gemini, extract_citation_info
 
-
-# ============================================================
-# CONSTANTS
-# ============================================================
-
 PAGE_TITLE = "ExamGPT"
-PAGE_ICON = None  # keep the browser tab clean, no emoji favicon
+PAGE_ICON = None
 
 STEPS = [
     ("01", "Upload", "Add class notes and previous year question papers as PDF files."),
@@ -37,12 +24,7 @@ FEATURES = [
 ]
 
 
-# ============================================================
-# THEME
-# ============================================================
-
 def get_theme(mode: str) -> dict:
-    """Return a dict of CSS variable values for the given theme mode."""
     if mode == "dark":
         return {
             "bg": "#0d0e12",
@@ -87,7 +69,6 @@ def get_theme(mode: str) -> dict:
 
 
 def inject_css(theme: dict) -> None:
-    """Inject the full stylesheet using the active theme's variables."""
     st.markdown(
         f"""
         <style>
@@ -108,13 +89,11 @@ def inject_css(theme: dict) -> None:
             color: {theme['text_primary']};
         }}
 
-        /* ---------- Layout helpers ---------- */
         .block-container {{
             padding-top: 3rem;
             max-width: 1100px;
         }}
 
-        /* ---------- Native top header / toolbar ---------- */
         [data-testid="stHeader"] {{
             background: {theme['bg']} !important;
             border-bottom: 1px solid {theme['divider']};
@@ -134,7 +113,6 @@ def inject_css(theme: dict) -> None:
             color: {theme['text_secondary']} !important;
         }}
 
-        /* ---------- Native buttons (force out of Streamlit's own light theme) ---------- */
         .stButton > button,
         .stButton > button:focus,
         .stButton > button:visited {{
@@ -165,7 +143,6 @@ def inject_css(theme: dict) -> None:
             color: #ffffff !important;
         }}
 
-        /* ---------- File uploader (dropzone + its internal browse button) ---------- */
         [data-testid="stFileUploaderDropzone"] {{
             background: {theme['input_bg']} !important;
             border: 1px dashed {theme['surface_border']} !important;
@@ -191,7 +168,6 @@ def inject_css(theme: dict) -> None:
             color: {theme['text_primary']} !important;
         }}
 
-        /* ---------- Text input ---------- */
         .stTextInput > div > div {{
             background: {theme['input_bg']} !important;
             border: 1px solid {theme['surface_border']} !important;
@@ -203,7 +179,6 @@ def inject_css(theme: dict) -> None:
             color: {theme['text_muted']} !important;
         }}
 
-        /* ---------- Glass card ---------- */
         .gp-card {{
             background: {theme['surface']};
             border: 1px solid {theme['surface_border']};
@@ -236,7 +211,6 @@ def inject_css(theme: dict) -> None:
             line-height: 1.55;
         }}
 
-        /* ---------- Step badge ---------- */
         .gp-step-num {{
             font-size: 12px;
             font-weight: 700;
@@ -246,7 +220,6 @@ def inject_css(theme: dict) -> None:
             font-variant-numeric: tabular-nums;
         }}
 
-        /* ---------- Stat card ---------- */
         .gp-stat {{
             background: {theme['surface']};
             border: 1px solid {theme['surface_border']};
@@ -270,7 +243,6 @@ def inject_css(theme: dict) -> None:
             letter-spacing: 0.04em;
         }}
 
-        /* ---------- Section heading ---------- */
         .gp-section-heading {{
             font-weight: 650;
             font-size: 19px;
@@ -285,7 +257,6 @@ def inject_css(theme: dict) -> None:
             margin-bottom: 18px;
         }}
 
-        /* ---------- Hero ---------- */
         .gp-hero-title {{
             font-size: 34px;
             font-weight: 700;
@@ -308,7 +279,6 @@ def inject_css(theme: dict) -> None:
             margin-bottom: 10px;
         }}
 
-        /* ---------- Sidebar sections ---------- */
         .gp-sidebar-label {{
             font-size: 11.5px;
             font-weight: 650;
@@ -318,7 +288,6 @@ def inject_css(theme: dict) -> None:
             margin: 18px 0 8px 0;
         }}
 
-        /* ---------- Divider ---------- */
         .gp-divider {{
             height: 1px;
             background: {theme['divider']};
@@ -326,7 +295,6 @@ def inject_css(theme: dict) -> None:
             margin: 28px 0;
         }}
 
-        /* ---------- Chat message polish ---------- */
         [data-testid="stChatMessage"] {{
             background: {theme['surface']};
             border: 1px solid {theme['surface_border']};
@@ -334,14 +302,12 @@ def inject_css(theme: dict) -> None:
             backdrop-filter: blur(8px);
         }}
 
-        /* ---------- Buttons ---------- */
         .stButton > button {{
             border-radius: 10px;
             font-weight: 550;
             transition: opacity 0.12s ease;
         }}
 
-        /* ---------- Custom status banners ---------- */
         .gp-banner {{
             border-radius: 10px;
             padding: 12px 14px;
@@ -357,16 +323,26 @@ def inject_css(theme: dict) -> None:
             color: {theme['error_text']};
         }}
 
+        /* --- ensure all input fields follow theme --- */
+        [data-testid="stChatInput"] textarea,
+        [data-testid="stChatInput"] input,
+        .stTextInput input,
+        .stTextArea textarea {{
+            background-color: {theme['input_bg']} !important;
+            color: {theme['text_primary']} !important;
+            border: 1px solid {theme['surface_border']} !important;
+        }}
+        [data-testid="stChatInput"] textarea::placeholder,
+        .stTextInput input::placeholder {{
+            color: {theme['text_muted']} !important;
+        }}
+
         footer {{visibility: hidden;}}
         </style>
         """,
         unsafe_allow_html=True,
     )
 
-
-# ============================================================
-# ICONS (inline SVG, stroke color follows theme)
-# ============================================================
 
 def get_icons(stroke: str, strong_stroke: str) -> dict:
     return {
@@ -403,13 +379,9 @@ def get_icons(stroke: str, strong_stroke: str) -> dict:
     }
 
 
-# ============================================================
-# SESSION STATE
-# ============================================================
-
 def init_session_state() -> None:
     defaults = {
-        "theme": "light",
+        "theme": "dark",
         "processed": False,
         "chat_history": [],
         "num_notes_files": 0,
@@ -422,15 +394,7 @@ def init_session_state() -> None:
             st.session_state[key] = value
 
 
-# ============================================================
-# BACKEND CALLS (wrappers only — no logic changes)
-# ============================================================
-
 def process_documents(notes_files, pyq_files, pyq_year) -> tuple[bool, str]:
-    """
-    Runs the exact same ingestion pipeline as before.
-    Returns (success, message).
-    """
     try:
         clear_vectorstore()
         total_chunks = 0
@@ -459,14 +423,10 @@ def process_documents(notes_files, pyq_files, pyq_year) -> tuple[bool, str]:
         st.session_state.chat_history = []
         return True, f"Processed successfully — {total_chunks} chunks stored."
     except Exception as exc:
-        return False, f"Something went wrong while processing: {exc}"
+        return False, f"Processing error: {str(exc)}"
 
 
 def generate_answer(query: str) -> tuple[str, list]:
-    """
-    Runs the exact same retrieval + generation pipeline as before.
-    Returns (answer_text, sources_list).
-    """
     try:
         answer, retrieved_chunks, pyq_mention = ask_gemini(query)
         if pyq_mention:
@@ -474,12 +434,8 @@ def generate_answer(query: str) -> tuple[str, list]:
         sources = [extract_citation_info(doc) for doc, _ in retrieved_chunks]
         return answer, sources
     except Exception as exc:
-        return f"Error while generating answer: {exc}", []
+        return f"Answer generation failed: {str(exc)}", []
 
-
-# ============================================================
-# UI: SIDEBAR
-# ============================================================
 
 def render_theme_toggle(icons: dict) -> None:
     is_dark = st.session_state.theme == "dark"
@@ -545,10 +501,6 @@ def render_sidebar(icons: dict) -> None:
                 st.rerun()
 
 
-# ============================================================
-# UI: LANDING PAGE (pre-processing)
-# ============================================================
-
 def render_hero(icons: dict) -> None:
     st.markdown(
         f"""
@@ -608,10 +560,6 @@ def render_landing(icons: dict) -> None:
     st.info("Upload notes and past papers in the sidebar, then click Process documents to begin.")
 
 
-# ============================================================
-# UI: STATS BAR (post-processing)
-# ============================================================
-
 def render_stats_bar() -> None:
     stats = [
         (str(st.session_state.num_notes_files), "Notes files"),
@@ -632,10 +580,6 @@ def render_stats_bar() -> None:
                 unsafe_allow_html=True,
             )
 
-
-# ============================================================
-# UI: CHAT INTERFACE (post-processing)
-# ============================================================
 
 def render_chat_history() -> None:
     for msg in st.session_state.chat_history:
@@ -689,10 +633,6 @@ def render_workspace(icons: dict) -> None:
     render_chat_history()
     render_chat_input()
 
-
-# ============================================================
-# MAIN
-# ============================================================
 
 def main() -> None:
     st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON, layout="wide")
