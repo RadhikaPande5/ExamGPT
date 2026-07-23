@@ -39,10 +39,6 @@ def load_and_chunk_pdf(file_path: str, doc_type: str, metadata_extra: dict = Non
     return chunks
 
 def ingest_pdf(file_path: str, doc_type: str, metadata_extra: dict = None):
-    """
-    Process a single PDF and add its chunks to Chroma.
-    Chroma collection is created/loaded with a fixed name.
-    """
     chunks = load_and_chunk_pdf(file_path, doc_type, metadata_extra)
     embeddings = get_embeddings()
 
@@ -52,7 +48,8 @@ def ingest_pdf(file_path: str, doc_type: str, metadata_extra: dict = None):
         collection_name="examgpt_collection"
     )
     vectordb.add_documents(chunks)
-    vectordb.persist()
+    if hasattr(vectordb, "persist"):
+        vectordb.persist()
     return len(chunks)
 
 def clear_vectorstore():
