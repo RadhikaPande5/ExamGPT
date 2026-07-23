@@ -1,27 +1,19 @@
 import os
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain_core.documents import Document
+from langchain_huggingface import HuggingFaceEmbeddings
 
-# Constants
 CHROMA_PERSIST_DIR = "./chroma_db"
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 
 def get_embeddings():
-    """Initialise Gemini embeddings (uses GOOGLE_API_KEY from env or streamlit secrets)."""
-    return GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-def load_and_chunk_pdf(file_path: str, doc_type: str, metadata_extra: dict = None) -> list[Document]:
-    """
-    Load PDF, split into page‑aware chunks, attach metadata.
-    doc_type: "notes" or "pyq"
-    metadata_extra: dict with keys like "year", "question_num" (for PYQs)
-    """
+def load_and_chunk_pdf(file_path: str, doc_type: str, metadata_extra: dict = None):
     loader = PyPDFLoader(file_path)
-    docs = loader.load()   
+    docs = loader.load()
 
     source_name = os.path.basename(file_path)
     for doc in docs:
@@ -35,8 +27,7 @@ def load_and_chunk_pdf(file_path: str, doc_type: str, metadata_extra: dict = Non
         chunk_overlap=CHUNK_OVERLAP,
         separators=["\n\n", "\n", " ", ""]
     )
-    chunks = text_splitter.split_documents(docs)
-    return chunks
+    return text_splitter.split_documents(docs)
 
 def ingest_pdf(file_path: str, doc_type: str, metadata_extra: dict = None):
     chunks = load_and_chunk_pdf(file_path, doc_type, metadata_extra)
@@ -53,7 +44,6 @@ def ingest_pdf(file_path: str, doc_type: str, metadata_extra: dict = None):
     return len(chunks)
 
 def clear_vectorstore():
-    """Wipe the entire collection (for a fresh start)."""
     embeddings = get_embeddings()
     vectordb = Chroma(
         persist_directory=CHROMA_PERSIST_DIR,
@@ -68,7 +58,6 @@ def clear_vectorstore():
     ).persist()
 
 def get_vectorstore():
-    """Return the existing Chroma instance (for retrieval)."""
     embeddings = get_embeddings()
     return Chroma(
         persist_directory=CHROMA_PERSIST_DIR,

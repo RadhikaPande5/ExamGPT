@@ -1,27 +1,27 @@
+import os
 from typing import List, Tuple
-from langchain_google_genai import ChatGoogleGenerativeAI
+from google import genai
+
 from ingestion import get_vectorstore
 
+
+api_key = os.environ["GOOGLE_API_KEY"]
+client = genai.Client(api_key=api_key)
+
+
 def retrieve_relevant_chunks(query: str, k: int = 5) -> List:
-    """
-    Get top‑k chunks from Chroma along with their metadata.
-    Returns list of (Document, score).
-    """
     vectordb = get_vectorstore()
     docs_with_scores = vectordb.similarity_search_with_score(query, k=k)
     return docs_with_scores
 
+
 def extract_citation_info(doc) -> str:
-    """Build a short citation string from chunk metadata."""
     source = doc.metadata.get("source", "unknown")
     page = doc.metadata.get("page", "?")
     return f"[{source}, p. {page}]"
 
+
 def build_prompt(query: str, retrieved_chunks: List) -> str:
-    """
-    Create the final prompt for Gemini, embedding retrieved text and
-    demanding source citations.
-    """
     context_parts = []
     for i, (doc, score) in enumerate(retrieved_chunks):
         cite = extract_citation_info(doc)
@@ -41,19 +41,18 @@ Student question: {query}
 Answer:"""
     return prompt
 
+
 def ask_gemini(query: str, k: int = 5) -> Tuple[str, List, str]:
-    """
-    Full retrieval + generation pipeline.
-    Returns (answer_text, retrieved_chunks_list, pyq_mention_string).
-    """
 
     retrieved = retrieve_relevant_chunks(query, k)
 
     prompt = build_prompt(query, retrieved)
 
-    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.1)
-    response = llm.invoke(prompt)
-    answer = response.content
+    response = client.models.generate_content(
+        model="gemini-flash-lite-latest",
+        contents=prompt,
+    )
+    answer = response.text
 
     pyq_info = []
     seen = set()
