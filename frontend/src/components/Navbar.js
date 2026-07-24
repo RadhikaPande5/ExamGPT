@@ -16,7 +16,6 @@ function Navbar() {
     // Go to home page
     const goHome = () => {
         navigate('/');
-        // Wait for page load then scroll to top
         setTimeout(() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 100);
@@ -34,7 +33,6 @@ function Navbar() {
             </div>
             
             <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
-                {/* About - Smooth scroll */}
                 <a href="#about" onClick={(e) => {
                     e.preventDefault();
                     scrollToSection('about');
@@ -43,7 +41,6 @@ function Navbar() {
                     About
                 </a>
                 
-                {/* Services - Smooth scroll */}
                 <a href="#services" onClick={(e) => {
                     e.preventDefault();
                     scrollToSection('services');
@@ -52,7 +49,6 @@ function Navbar() {
                     Services
                 </a>
                 
-                {/* Contact - Smooth scroll */}
                 <a href="#contact" onClick={(e) => {
                     e.preventDefault();
                     scrollToSection('contact');
@@ -62,12 +58,10 @@ function Navbar() {
                 </a>
                 
                 <div className="nav-actions">
-                    {/* Login Button - Page change */}
                     <Link to="/login">
                         <button className="btn-outline"><i className="fas fa-sign-in-alt"></i> Login</button>
                     </Link>
                     
-                    {/* Register Button - Page change */}
                     <Link to="/login?mode=register">
                         <button className="btn-primary"><i className="fas fa-user-plus"></i> Register</button>
                     </Link>

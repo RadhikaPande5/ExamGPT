@@ -3,17 +3,12 @@ import React from 'react';
 function Hero() {
     return (
         <section className="hero" id="home">
-            {/* Background Particles */}
-            <div className="particle"></div>
-            <div className="particle"></div>
-            <div className="particle"></div>
-            
             <div className="hero-content">
                 <div className="badge">
                     <i className="fas fa-sparkles"></i> AI-Powered Learning
                 </div>
                 <h1>
-                    <i className="fas fa-robot"></i> <span className="highlight">ExamGPT</span><br />
+                    <span className="highlight">ExamGPT</span><br />
                     Ace your exams with AI
                 </h1>
                 <p className="subtitle">
@@ -21,7 +16,7 @@ function Hero() {
                     Powered by advanced RAG and Gemini — your personal exam assistant.
                 </p>
                 <a 
-                    href="http://localhost:8501"
+                    href="https://examgpt.streamlit.app/"
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="btn-primary" 
@@ -34,22 +29,6 @@ function Hero() {
                 >
                     <i className="fas fa-rocket"></i> Get started
                 </a>
-            </div>
-            
-            <div className="hero-illustration">
-                <div className="image-container">
-                    <i className="fas fa-brain floating-icons"></i>
-                    <i className="fas fa-microchip floating-icons"></i>
-                    <i className="fas fa-cloud floating-icons"></i>
-                    <i className="fas fa-database floating-icons"></i>
-                    <i className="fas fa-graduation-cap main-icon"></i>
-                    <div className="tech-stack">
-                        <span>🤖 AI</span>
-                        <span>⚡ RAG</span>
-                        <span>🧠 Gemini</span>
-                        <span>📊 ML</span>
-                    </div>
-                </div>
             </div>
         </section>
     );

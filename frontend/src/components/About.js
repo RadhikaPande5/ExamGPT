@@ -1,13 +1,6 @@
 import React from 'react';
 
-function About({ darkMode }) {
-    const stats = [
-        { icon: 'fa-file-alt', number: '10K+', label: 'Documents Processed' },
-        { icon: 'fa-users', number: '5K+', label: 'Active Students' },
-        { icon: 'fa-question-circle', number: '50K+', label: 'Questions Answered' },
-        { icon: 'fa-star', number: '4.9', label: 'User Rating' }
-    ];
-
+function About() {
     const features = [
         { 
             icon: 'fa-brain', 
@@ -48,7 +41,6 @@ function About({ darkMode }) {
             </h2>
             
             <div className="about-grid">
-                {/* Left Side - Text Content */}
                 <div className="about-content">
                     <div className="about-text">
                         <p className="highlight-text">
@@ -62,17 +54,6 @@ function About({ darkMode }) {
                             ExamGPT adapts to your learning style. No more endless scrolling — just ask and learn.
                         </p>
                     </div>
-                </div>
-
-                {/* Right Side - Stats */}
-                <div className="about-stats">
-                    {stats.map((stat, index) => (
-                        <div className="stat-card" key={index}>
-                            <i className={`fas ${stat.icon}`}></i>
-                            <h3>{stat.number}</h3>
-                            <p>{stat.label}</p>
-                        </div>
-                    ))}
                 </div>
             </div>
 
@@ -91,26 +72,6 @@ function About({ darkMode }) {
                             <p>{feature.desc}</p>
                         </div>
                     ))}
-                </div>
-            </div>
-
-            {/* Mission & Vision - Horizontal */}
-            <div className="mission-vision-horizontal">
-                <div className="mission-card">
-                    <div className="card-icon">
-                        <i className="fas fa-bullseye"></i>
-                    </div>
-                    <h3>Our Mission</h3>
-                    <p>To democratize education by making AI-powered learning accessible to every student, 
-                    helping them achieve academic excellence with confidence.</p>
-                </div>
-                <div className="vision-card">
-                    <div className="card-icon">
-                        <i className="fas fa-eye"></i>
-                    </div>
-                    <h3>Our Vision</h3>
-                    <p>To become the world's leading AI study companion, transforming how students learn, 
-                    revise, and prepare for exams across all subjects and levels.</p>
                 </div>
             </div>
         </div>
